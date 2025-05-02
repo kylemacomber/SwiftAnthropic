@@ -137,11 +137,11 @@ public struct MessageParameter: Encodable {
          }
          
          public enum ContentObject: Encodable {
-            case text(String)
-            case image(ImageSource)
-            case document(DocumentSource)
-            case toolUse(String, String, MessageResponse.Content.Input)
-            case toolResult(String, String, Bool?)
+            case text(String, CacheControl?)
+            case image(ImageSource, CacheControl?)
+            case document(DocumentSource, CacheControl?)
+            case toolUse(String, String, MessageResponse.Content.Input, CacheControl?)
+            case toolResult(String, String, Bool?, CacheControl?)
             case cache(Cache)
             case thinking(String, String)  // (thinking content, signature)
             case redactedThinking(String)  // data field for redacted thinking
@@ -150,29 +150,44 @@ public struct MessageParameter: Encodable {
             public func encode(to encoder: Encoder) throws {
                var container = encoder.container(keyedBy: CodingKeys.self)
                switch self {
-               case .text(let text):
+               case .text(let text, let cacheControl):
                   try container.encode("text", forKey: .type)
                   try container.encode(text, forKey: .text)
-               case .image(let source):
+                  if let cacheControl {
+                     try container.encode(cacheControl, forKey: .cacheControl)
+                  }
+               case .image(let source, let cacheControl):
                   try container.encode("image", forKey: .type)
                   try container.encode(source, forKey: .source)
-               case .document(let document):
+                  if let cacheControl {
+                     try container.encode(cacheControl, forKey: .cacheControl)
+                  }
+               case .document(let document, let cacheControl):
                   try container.encode("document", forKey: .type)
                   // Encode the full document structure
                   try container.encode(document.source, forKey: .source)
                   try container.encodeIfPresent(document.title, forKey: .title)
                   try container.encodeIfPresent(document.context, forKey: .context)
                   try container.encodeIfPresent(document.citations, forKey: .citations)
-               case .toolUse(let id, let name, let input):
+                  if let cacheControl {
+                     try container.encode(cacheControl, forKey: .cacheControl)
+                  }
+               case .toolUse(let id, let name, let input, let cacheControl):
                   try container.encode("tool_use", forKey: .type)
                   try container.encode(id, forKey: .id)
                   try container.encode(name, forKey: .name)
                   try container.encode(input, forKey: .input)
-               case .toolResult(let toolUseId, let content, let isError):
+                  if let cacheControl {
+                     try container.encode(cacheControl, forKey: .cacheControl)
+                  }
+               case .toolResult(let toolUseId, let content, let isError, let cacheControl):
                   try container.encode("tool_result", forKey: .type)
                   try container.encode(toolUseId, forKey: .toolUseId)
                   try container.encode(content, forKey: .content)
                   try container.encodeIfPresent(isError, forKey: .isError)
+                  if let cacheControl {
+                     try container.encode(cacheControl, forKey: .cacheControl)
+                  }
                case .cache(let cache):
                   try container.encode(cache.type.rawValue, forKey: .type)
                   try container.encode(cache.text, forKey: .text)
@@ -209,7 +224,7 @@ public struct MessageParameter: Encodable {
             }
             
             public static func toolResult(_ toolUseId: String, _ content: String) -> ContentObject {
-               return .toolResult(toolUseId, content, nil)
+               return .toolResult(toolUseId, content, nil, nil)
             }
          }
          
