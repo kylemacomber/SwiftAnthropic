@@ -92,7 +92,7 @@ public struct MessageResponse: Decodable {
          case type, text, id, name, input, citations, thinking, signature
       }
       
-      public enum DynamicContent: Codable {
+      public enum DynamicContent: Codable, Equatable {
          case string(String)
          case integer(Int)
          case double(Double)
