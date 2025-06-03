@@ -19,8 +19,8 @@ import Foundation
 /// A final message_stop event.
 ///
 /// This structured sequence facilitates the orderly reception and processing of message components and overall changes.
-public struct MessageStreamResponse: Decodable {
-   
+public struct MessageStreamResponse: Decodable, AnthropicResponse {
+
    public let type: String
    
    public let index: Int?
@@ -36,7 +36,10 @@ public struct MessageStreamResponse: Decodable {
     
    /// Available in "message_delta" events.
    public let usage: MessageResponse.Usage?
-   
+
+   /// The unique request identifier from the response header (x-request-id).
+   public var requestID: String?
+
    public var streamEvent: StreamEvent? {
       StreamEvent(rawValue: type)
    }
