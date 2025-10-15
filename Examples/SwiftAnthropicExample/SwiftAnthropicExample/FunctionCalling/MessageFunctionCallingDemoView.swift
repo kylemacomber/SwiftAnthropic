@@ -85,9 +85,9 @@ struct MessageFunctionCallingDemoView: View {
             Task {
                
                let images: [MessageParameter.Message.Content.ContentObject] = selectedImagesEncoded.map {
-                  .image(.init(type: .base64, mediaType: .jpeg, data: $0))
+                  .image(.base64(.jpeg, $0), nil)
                }
-               let text: [MessageParameter.Message.Content.ContentObject] = [.text(prompt)]
+               let text: [MessageParameter.Message.Content.ContentObject] = [.text(prompt, nil)]
                
                let finalInput = images + text
                
@@ -95,7 +95,7 @@ struct MessageFunctionCallingDemoView: View {
                
                prompt = ""
                let parameters = MessageParameter(
-                  model: .claude35Sonnet,
+                  model: .claude37Sonnet,
                   messages: messages,
                   maxTokens: 1024, 
                   tools: [FunctionCallDefinition.getWeather.tool])
