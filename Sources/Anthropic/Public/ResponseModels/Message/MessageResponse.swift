@@ -86,13 +86,21 @@ public struct MessageResponse: Decodable, AnthropicResponse {
          public let thinking: String
          public let signature: String?
       }
-      
+
+      /// Represents redacted thinking content that has been encrypted for safety reasons.
+      /// The `data` field contains encrypted content that isn't human-readable but is
+      /// decrypted when passed back to the API, allowing Claude to continue its response.
+      public struct RedactedThinking: Codable {
+         public let data: String
+      }
+
       case text(String, Citations?)
       case toolUse(ToolUse)
       case thinking(Thinking)
-      
+      case redactedThinking(RedactedThinking)
+
       private enum CodingKeys: String, CodingKey {
-         case type, text, id, name, input, citations, thinking, signature
+         case type, text, id, name, input, citations, thinking, signature, data
       }
       
       public enum DynamicContent: Codable, Equatable {
@@ -163,6 +171,9 @@ public struct MessageResponse: Decodable, AnthropicResponse {
             let thinking = try container.decode(String.self, forKey: .thinking)
             let signature = try container.decodeIfPresent(String.self, forKey: .signature)
             self = .thinking(Thinking(thinking: thinking, signature: signature))
+         case "redacted_thinking":
+            let data = try container.decode(String.self, forKey: .data)
+            self = .redactedThinking(RedactedThinking(data: data))
          default:
             throw DecodingError.dataCorruptedError(forKey: .type, in: container, debugDescription: "Invalid type value found in JSON!")
          }
@@ -184,6 +195,9 @@ public struct MessageResponse: Decodable, AnthropicResponse {
             try container.encode("thinking", forKey: .type)
             try container.encode(thinking.thinking, forKey: .thinking)
             try container.encodeIfPresent(thinking.signature, forKey: .signature)
+         case .redactedThinking(let redactedThinking):
+            try container.encode("redacted_thinking", forKey: .type)
+            try container.encode(redactedThinking.data, forKey: .data)
          }
       }
    }
