@@ -306,14 +306,6 @@ public struct MessageResponse: Decodable, AnthropicResponse {
       /// [Prompt Caching](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#how-can-i-track-the-effectiveness-of-my-caching-strategy)
       /// You can monitor cache performance using the cache_creation_input_tokens and cache_read_input_tokens fields in the API response.
       public let cacheReadInputTokens: Int?
-
-      private enum CodingKeys: String, CodingKey {
-         case inputTokens = "input_tokens"
-         case outputTokens = "output_tokens"
-         case thinkingTokens = "thinking_tokens"
-         case cacheCreationInputTokens = "cache_creation_input_tokens"
-         case cacheReadInputTokens = "cache_read_input_tokens"
-      }
    }
 }
 
